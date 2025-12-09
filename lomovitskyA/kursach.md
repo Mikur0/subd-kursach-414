@@ -96,26 +96,38 @@ CREATE TABLE manufacturers (
     country VARCHAR(50)
 );
 
--- 3. Основная таблица товаров
+-- 3. Основная таблица товаров (ОБНОВЛЕННАЯ)
 CREATE TABLE products (
     product_id SERIAL PRIMARY KEY,
-    part_number VARCHAR(50) NOT NULL,       -- Артикул (уникальный в рамках бренда)
-    name VARCHAR(255) NOT NULL,             -- Название детали
+    part_number VARCHAR(50) NOT NULL,
+    name VARCHAR(255) NOT NULL,
     
-    -- Адресное хранение: Зона-Ряд-Полка (например, "A-12-04")
-    -- Значение по умолчанию 'RECEPTION' (зона приемки)
     location_code VARCHAR(20) DEFAULT 'RECEPTION', 
     
-    -- Учетная цена (себестоимость)
     price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
-    
-    -- Текущий остаток. Изменяется автоматически триггерами
     stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
+    
+    -- НОВОЕ ПОЛЕ: Срок годности
+    -- Делаем его необязательным (NULL), так как у железных запчастей срока нет
+    expiration_date DATE,
     
     category_id INTEGER REFERENCES categories(category_id) ON DELETE SET NULL,
     manufacturer_id INTEGER REFERENCES manufacturers(manufacturer_id) ON DELETE SET NULL,
-    
     description TEXT
+);
+
+-- ... Таблица contractors без изменений ...
+
+-- 5. Журнал складских операций (ОБНОВЛЕННЫЙ)
+CREATE TABLE stock_movements (
+    movement_id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    -- НОВЫЙ ТИП: 'writeoff' (Списание просрочки/брака)
+    operation_type VARCHAR(10) NOT NULL CHECK (operation_type IN ('in', 'out', 'writeoff')),
+    
+    contractor_id INTEGER REFERENCES contractors(contractor_id) ON DELETE SET NULL,
+    comments TEXT
 );
 
 -- 4. Таблица Контрагентов (Единый реестр)
@@ -165,24 +177,24 @@ CREATE TABLE movement_items (
 CREATE OR REPLACE FUNCTION update_stock_on_movement()
 RETURNS TRIGGER AS $$
 DECLARE
-    op_type VARCHAR(10); -- Переменная для хранения типа операции
+    op_type VARCHAR(10);
 BEGIN
-    -- 1. Определяем тип операции (Приход или Расход) из связанной таблицы stock_movements
     SELECT operation_type INTO op_type 
     FROM stock_movements 
     WHERE movement_id = NEW.movement_id;
 
-    -- 2. Логика для ПРИХОДА ('in')
+    -- Приход
     IF op_type = 'in' THEN
         UPDATE products 
         SET stock_quantity = stock_quantity + NEW.quantity
         WHERE product_id = NEW.product_id;
         
-    -- 3. Логика для РАСХОДА ('out')
-    ELSIF op_type = 'out' THEN
-        -- Дополнительная проверка на уровне триггера
+    -- Расход ИЛИ Списание (Логика одинаковая - товар уходит со склада)
+    ELSIF op_type IN ('out', 'writeoff') THEN
+        
+        -- Проверка остатка
         IF (SELECT stock_quantity FROM products WHERE product_id = NEW.product_id) < NEW.quantity THEN
-            RAISE EXCEPTION 'Ошибка: Недостаточно товара на складе для данной операции!';
+            RAISE EXCEPTION 'Ошибка: Недостаточно товара для отгрузки или списания!';
         END IF;
 
         UPDATE products 
@@ -240,6 +252,31 @@ JOIN stock_movements m ON mi.movement_id = m.movement_id
 JOIN products p ON mi.product_id = p.product_id
 JOIN contractors c ON m.contractor_id = c.contractor_id
 ORDER BY m.created_at DESC;
+
+-- 3. НОВОЕ ПРЕДСТАВЛЕНИЕ: Монитор сроков годности
+-- Показывает товары, которые УЖЕ просрочены или истекут в ближайшие 30 дней
+CREATE OR REPLACE VIEW v_expiring_goods AS
+SELECT 
+    p.product_id,
+    p.part_number,
+    p.name,
+    p.location_code,
+    p.stock_quantity,
+    p.expiration_date,
+    -- Вычисляем статус:
+    CASE 
+        WHEN p.expiration_date < CURRENT_DATE THEN 'ПРОСРОЧЕНО'
+        WHEN p.expiration_date <= (CURRENT_DATE + INTERVAL '30 days') THEN 'Истекает скоро'
+        ELSE 'Норма'
+    END AS статус_годности,
+    -- Сколько дней осталось (отрицательное число = просрочка)
+    (p.expiration_date - CURRENT_DATE) AS дней_осталось
+FROM products p
+WHERE 
+    p.expiration_date IS NOT NULL  -- Ищем только товары со сроком годности
+    AND p.stock_quantity > 0       -- И только те, что есть на остатке
+    AND p.expiration_date <= (CURRENT_DATE + INTERVAL '30 days') -- Фильтр: 30 дней или меньше
+ORDER BY p.expiration_date ASC;
 ```
 
 ---
@@ -273,6 +310,21 @@ INSERT INTO stock_movements (operation_type, contractor_id) VALUES ('out', 2); -
 INSERT INTO movement_items (movement_id, product_id, quantity, price) VALUES (2, 1, 2, 4500.00);
 
 -- *Проверка:* SELECT stock_quantity FROM products; -> Результат: 8. Остаток уменьшился.
+
+-- 1. Добавляем масло, которое "протухает" завтра
+INSERT INTO products (part_number, name, stock_quantity, price, expiration_date) 
+VALUES ('OIL-OLD', 'Масло Старое', 5, 1000.00, CURRENT_DATE + INTERVAL '1 day');
+
+-- 2. Смотрим отчет (Там должно появиться это масло)
+SELECT * FROM v_expiring_goods;
+
+-- 3. Списываем его (Утилизация)
+INSERT INTO stock_movements (operation_type, comments) VALUES ('writeoff', 'Списание по сроку годности');
+INSERT INTO movement_items (movement_id, product_id, quantity, price) VALUES 
+((SELECT MAX(movement_id) FROM stock_movements), (SELECT product_id FROM products WHERE part_number = 'OIL-OLD'), 5, 0);
+
+-- 4. Товар ушел в ноль
+SELECT stock_quantity FROM products WHERE part_number = 'OIL-OLD';
 ```
 
 ---
