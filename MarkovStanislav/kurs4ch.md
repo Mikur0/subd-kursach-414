@@ -1246,6 +1246,146 @@ PostgreSQL.
   </li>
 </ol>
 
+<br>
+
+<h2 id="приложение-а">Приложение А</h2>
+<h3>Реализация базы данных для учета домашних финансов в СУБД PostgreSQL</h3>
+
+<p>
+В данном приложении представлена реализация структуры базы данных для учета
+домашних финансов с использованием системы управления базами данных PostgreSQL
+и языка структурированных запросов SQL. Приведённый SQL-код демонстрирует
+создание таблиц, определение связей между ними, а также примеры заполнения
+таблиц тестовыми данными и выполнения запросов.
+</p>
+
+<h4>Создание таблиц базы данных</h4>
+
+<p>
+Для хранения информации о финансовых операциях пользователя в базе данных
+создаются таблицы, отражающие основные информационные объекты предметной области.
+</p>
+
+<pre><code class="language-sql">
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    created_at DATE NOT NULL
+);
+
+CREATE TABLE categories (
+    category_id SERIAL PRIMARY KEY,
+    category_name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE operations (
+    operation_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    category_id INTEGER NOT NULL,
+    operation_type VARCHAR(10) NOT NULL,
+    amount NUMERIC(10,2) NOT NULL,
+    operation_date DATE NOT NULL,
+    description TEXT,
+    CONSTRAINT fk_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id),
+    CONSTRAINT fk_category
+        FOREIGN KEY (category_id)
+        REFERENCES categories(category_id)
+);
+</code></pre>
+
+<p>
+Таблица <b>users</b> предназначена для хранения информации о пользователях системы.
+Таблица <b>categories</b> содержит перечень категорий доходов и расходов.
+Таблица <b>operations</b> используется для хранения данных о финансовых операциях
+и связана с таблицами пользователей и категорий с помощью внешних ключей.
+</p>
+
+<h4>Заполнение таблиц тестовыми данными</h4>
+
+<p>
+Для проверки корректности работы базы данных выполняется заполнение таблиц
+примерными тестовыми данными.
+</p>
+
+<pre><code class="language-sql">
+INSERT INTO users (username, created_at)
+VALUES
+('Иванов И.И.', '2024-01-01');
+
+INSERT INTO categories (category_name)
+VALUES
+('Заработная плата'),
+('Продукты'),
+('Транспорт'),
+('Коммунальные услуги'),
+('Развлечения');
+
+INSERT INTO operations (user_id, category_id, operation_type, amount, operation_date, description)
+VALUES
+(1, 1, 'доход', 60000.00, '2024-01-05', 'Заработная плата за январь'),
+(1, 2, 'расход', 8500.00, '2024-01-10', 'Покупка продуктов'),
+(1, 3, 'расход', 2300.00, '2024-01-12', 'Проезд в общественном транспорте'),
+(1, 4, 'расход', 4200.00, '2024-01-15', 'Оплата коммунальных услуг'),
+(1, 5, 'расход', 3000.00, '2024-01-20', 'Посещение кинотеатра');
+</code></pre>
+
+<h4>Примеры SQL-запросов</h4>
+
+<p>
+Для получения данных из базы используются SQL-запросы, позволяющие формировать
+отчеты и аналитическую информацию.
+</p>
+
+<p><b>Получение списка всех операций пользователя:</b></p>
+
+<pre><code class="language-sql">
+SELECT
+    o.operation_date,
+    c.category_name,
+    o.operation_type,
+    o.amount,
+    o.description
+FROM operations o
+JOIN categories c ON o.category_id = c.category_id
+WHERE o.user_id = 1
+ORDER BY o.operation_date;
+</code></pre>
+
+<p><b>Подсчет общей суммы расходов пользователя:</b></p>
+
+<pre><code class="language-sql">
+SELECT
+    SUM(amount) AS total_expenses
+FROM operations
+WHERE operation_type = 'расход'
+AND user_id = 1;
+</code></pre>
+
+<p><b>Подсчет общей суммы доходов пользователя:</b></p>
+
+<pre><code class="language-sql">
+SELECT
+    SUM(amount) AS total_income
+FROM operations
+WHERE operation_type = 'доход'
+AND user_id = 1;
+</code></pre>
+
+<p>
+Приведённые SQL-запросы демонстрируют основные возможности работы с базой данных
+и позволяют получать информацию, необходимую для анализа доходов и расходов
+пользователя.
+</p>
+
+<p>
+Таким образом, реализованная структура базы данных и примеры SQL-запросов
+подтверждают возможность использования СУБД PostgreSQL для создания системы
+учета домашних финансов в рамках учебного проекта.
+</p>
+
+
 
 
 
