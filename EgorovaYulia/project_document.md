@@ -1770,12 +1770,10 @@ ORDER BY month DESC;
 
 8. **Работа с pgAdmin 4: от установки до администрирования** [Электронный ресурс] // Selectel. — 2023. — URL: https://selectel.ru/blog/tutorials/pgadmin-4-install-and-use/
 
-9. **Оптимизация запросов в PostgreSQL** [Электронный ресурс] // Timeweb Cloud. — 2023. — URL: https://timeweb.cloud/tutorials/optimizatsiya-zaprosov-v-postgresql
+9. **pgAdmin 4 Documentation** [Электронный ресурс]. — URL: https://www.pgadmin.org/docs/
 
-10. **pgAdmin 4 Documentation** [Электронный ресурс]. — URL: https://www.pgadmin.org/docs/
+10. **Любимые книги: что читают россияне** [Электронный ресурс] // ВЦИОМ. — 2023. — URL: https://wciom.ru/analytical-reviews/analiticheskii-obzor/lyubimye-knigi-chto-chitayut-rossiyane
 
-11. **Любимые книги: что читают россияне** [Электронный ресурс] // ВЦИОМ. — 2023. — URL: https://wciom.ru/analytical-reviews/analiticheskii-obzor/lyubimye-knigi-chto-chitayut-rossiyane
+11. **Windows 11** [Электронный ресурс] // Википедия. — 2024. — URL: https://ru.wikipedia.org/wiki/Windows_11
 
-12. **Windows 11** [Электронный ресурс] // Википедия. — 2024. — URL: https://ru.wikipedia.org/wiki/Windows_11
-
-13. **Современные системы автоматизации библиотек** [Электронный ресурс] // Библиотечное дело. — 2023. — № 5. — С. 24-28.
+12. **Современные системы автоматизации библиотек** [Электронный ресурс] // Библиотечное дело. — 2023. — № 5. — С. 24-28.
