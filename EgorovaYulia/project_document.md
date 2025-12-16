@@ -1792,3 +1792,16 @@ ORDER BY month DESC;
 
 ## <a id="photos"> **Приложения** </a>
 
+
+#### **Окно авторизации:**
+
+![Окно авторизации](photos\photo1.jpg)
+![Окно авторизации](photos\photo2.jpg)
+![Окно авторизации](photos\photo3.jpg)
+
+#### **Интерфейс приложения:**
+
+![Интерфейс приложения](photos\photo4.jpg)
+![Интерфейс приложения](photos\photo5.jpg)
+![Интерфейс приложения](photos\photo6.jpg)
+![Интерфейс приложения](photos\photo7.jpg)
