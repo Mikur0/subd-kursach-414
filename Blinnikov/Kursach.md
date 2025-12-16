@@ -242,13 +242,13 @@
 
 | Категория        | Сущность       | Ключевые поля                  | Источник ввода                  | Обязательность
 |------------------|----------------|--------------------------------|---------------------------------|-----------------
-| Справочная       | post	         | name                           | Администратор/Владелец          | Да
+| Справочная       | post	        | name                           | Администратор/Владелец          | Да
 |                  | employee       | surname, name, post_id         | Администратор                   | Да
 |                  | payment_method	| name                           | Система/Администратор           | Да
 |                  | contact_method	| name                           | Система/Администратор           | Да
 |                  | service        | name, service_price            | Администратор/Владелец          | Да
-| Операционная     | client	| name, phone                    | Работник/Клиент                 | Да
-|                  | orders 	| client_id, payment_method_id   | Система (на основе корзины)     | Да
+| Операционная     | client	        | name, phone                    | Работник/Клиент                 | Да
+|                  | orders 	    | client_id, payment_method_id   | Система (на основе корзины)     | Да
 |                  | order_info    	| order_id, service_id, quantity | Работник (добавление в корзину) | Да
 | Административная | users          | username, password, role       | Владелец/Администратор          | Да
 | Сессионная       | Корзина        | service_id, quantity           | Работник                        | Нет (временные)
@@ -960,13 +960,13 @@
 
 │ Связь (Концептуальная)      │ Реализация в БД                                             │ Тип связи в БД │ Примечание
 │-----------------------------│-------------------------------------------------------------│----------------│----------------------------------------------
-│ Post(1) - Employee(N)       │ employee.post_id → post.post_id                             │ 1:N	          │ Каждый сотрудник ссылается на одну должность
+│ Post(1) - Employee(N)       │ employee.post_id → post.post_id                             │ 1:N	         │ Каждый сотрудник ссылается на одну должность
 │ Client(1) - Order(N)        │ orders.client_id → client.client_id                         │ 1:N            │ Каждый заказ ссылается на одного клиента
 │ PaymentMethod(1) - Order(N) │ orders.payment_method_id → payment_method.payment_method_id │ 1:N            │ Связь заказа со способом оплаты
-│ ContactMethod(1) - Order(N) │ orders.contact_method_id → contact_method.contact_method_id │ 1:N	          │ Связь заказа со способом связи
-│ Order(1) - OrderInfo(N)     │ order_info.order_id → orders.order_id                       │ 1:N	          │ Детализация заказа
-│ Service(1) - OrderInfo(N)   │ order_info.service_id → service.service_id                  │ 1:N	          │ Указание услуги в составе заказа
-│ Order(M) - Service(N)       │ Реализована через *order_info как две связи 1:N             │ M:N	          │ Косвенная связь через промежуточную таблицу
+│ ContactMethod(1) - Order(N) │ orders.contact_method_id → contact_method.contact_method_id │ 1:N	         │ Связь заказа со способом связи
+│ Order(1) - OrderInfo(N)     │ order_info.order_id → orders.order_id                       │ 1:N	         │ Детализация заказа
+│ Service(1) - OrderInfo(N)   │ order_info.service_id → service.service_id                  │ 1:N	         │ Указание услуги в составе заказа
+│ Order(M) - Service(N)       │ Реализована через *order_info как две связи 1:N             │ M:N	         │ Косвенная связь через промежуточную таблицу
 
 ### 3.3. Нормализация базы данных
 #### База данных приведена к третьей нормальной форме (3NF):
