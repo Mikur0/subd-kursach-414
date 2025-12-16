@@ -545,6 +545,7 @@ CREATE TABLE habit_tracking (
 );
 
 -- Таблица отслеживания веса
+ ```sql
 CREATE TABLE weight_tracking (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -557,8 +558,9 @@ CREATE TABLE weight_tracking (
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT unique_user_weight_date UNIQUE (user_id, date)
+```
 
-    -- Включаем RLS для всех таблиц
+```sql
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
@@ -566,51 +568,69 @@ ALTER TABLE goal_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE habits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE habit_tracking ENABLE ROW LEVEL SECURITY;
 ALTER TABLE weight_tracking ENABLE ROW LEVEL SECURITY;
+```
 
 -- Только администраторы могут видеть всех пользователей
 -- Пользователи видят только свои данные
 --Так для всех таблиц
+```sql
 CREATE POLICY users_select_policy ON users
     FOR SELECT
     USING (
         id = current_setting('app.current_user_id', TRUE)::INTEGER 
         OR current_setting('app.user_role', TRUE) = 'postgres'
     );
+```
 
     
 Получение всех активных пользователей
+```sql
 SELECT id, username, email, created_at 
 FROM users 
 WHERE is_active = TRUE 
 ORDER BY created_at DESC;
+```
 
 
 Получение всех целей одного пользователя
+```sql
 SELECT title, description, status, current_value, target_value, unit, end_date
 FROM goals 
 WHERE user_id = 1 
 ORDER BY priority DESC, end_date;
+```
 
 Получение активных привычек пользователя
+```sql
 SELECT name, description, frequency, target_count, start_date
 FROM habits 
 WHERE user_id = 1 AND is_active = TRUE;
+```
+
 
 Регистрация нового пользователя
+```sql
 INSERT INTO users (username, email, password_hash) 
 VALUES ('new_user', 'user@example.com', 'hashed_password_123');
+```
 
 Создание новой цели
+```sql
 INSERT INTO goals (user_id, title, goal_type, target_value, unit, start_date, priority) 
 VALUES (1, 'Пробежать 10 км', 'numeric', 10, 'км', '2024-02-01', 3);
+```
 
 Создание новой привычки
+```sql
 INSERT INTO habits (user_id, name, frequency, target_count, start_date) 
 VALUES (1, 'Читать книгу', 'daily', 1, '2024-02-01');
+```
 
 Фиксация выполнения привычки на сегодня
+```sql
 INSERT INTO habit_tracking (habit_id, date, completed_count, target_count) 
 VALUES (1, CURRENT_DATE, 1, 1);
+```
 
 
 ## <a id="end"> **Заключение** </a>
@@ -619,26 +639,26 @@ VALUES (1, CURRENT_DATE, 1, 1);
 ## <a id="literature"> **Список литературы** </a>
 
 Основная литература
-Дейтел, П. Дж., Дейтел, Х. М. PHP и MySQL. Разработка веб-приложений. — 5-е изд. — СПб.: Питер, 2021. — 816 с.
+Дейтел, П. Дж., Дейтел, Х. М. PHP и MySQL. Разработка веб-приложений. — 5-е изд. — СПб.: Питер, 2021.
 Содержит полное руководство по разработке веб-приложений с использованием PHP и баз данных.
 
 Дакетт, Дж. HTML и CSS. Разработка и дизайн веб-сайтов. — М.: Эксмо, 2020. — 480 с.
 *Классическое руководство по основам веб-разработки, включая HTML5 и CSS3.*
 
-Петин, В. А. Разработка веб-приложений с помощью PHP и MySQL. — 4-е изд. — СПб.: БХВ-Петербург, 2022. — 704 с.
+Петин, В. А. Разработка веб-приложений с помощью PHP и MySQL. — 4-е изд. — СПб.: БХВ-Петербург, 2022.
 Практическое руководство с примерами создания полного веб-приложения.
 
-Карпова, Т. С. Базы данных: модели, разработка, реализация. — 2-е изд. — СПб.: Питер, 2021. — 560 с.
+Карпова, Т. С. Базы данных: модели, разработка, реализация. — 2-е изд. — СПб.: Питер, 2021. 
 Теоретические основы проектирования и реализации баз данных.
 
 Официальная документация
-PostgreSQL Global Development Group. PostgreSQL 14 Documentation [Электронный ресурс]. — Режим доступа: https://www.postgresql.org/docs/14/index.html (дата обращения: 25.11.2023).
+PostgreSQL Global Development Group. PostgreSQL 14 Documentation [Электронный ресурс]. — Режим доступа: https://www.postgresql.org/docs/14/index.html
 Официальная документация по СУБД PostgreSQL.
 
-PHP Documentation Group. PHP Manual [Электронный ресурс]. — Режим доступа: https://www.php.net/manual/ru/ (дата обращения: 25.11.2023).
+PHP Documentation Group. PHP Manual [Электронный ресурс]. — Режим доступа: https://www.php.net/manual/ru/
 Официальная документация по языку PHP.
 
-World Wide Web Consortium (W3C). HTML Living Standard [Электронный ресурс]. — Режим доступа: https://html.spec.whatwg.org/ (дата обращения: 25.11.2023).
+World Wide Web Consortium (W3C). HTML Living Standard [Электронный ресурс]. — Режим доступа: https://html.spec.whatwg.org/
 Спецификация стандарта HTML.
 
 
