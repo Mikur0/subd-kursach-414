@@ -459,7 +459,186 @@ ENUM/CHECK для типов — ограничивают допустимые �
 
 Физическая структура проектируется таким образом, чтобы система максимально эффективно обрабатывала данные, предоставляя пользователю доступ к нужной информации с минимальной задержкой. Это достигается с помощью выбора правильных типов данных, создания оптимальных индексов, реализации механизмов хранения и настройки параметров, обеспечивающих производительность и надежность.
 
+## <a id="implementation"> Реализация проекта в среде конкретной СУБД. </a>
+
+Описание разработки таблиц в конкретной среде СУБД
+
+Разработка таблиц осуществлялась в среде PostgreSQL 14+ с использованием SQL-скриптов, выполняемых через утилиту командной строки psql. Все таблицы созданы с учетом нормализации до 3NF, с явным указанием типов данных, ограничений целостности и связей между таблицами.
+
+
+-- Таблица пользователей
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+-- Таблица категорий
+CREATE TABLE categories (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(50) NOT NULL,
+    type VARCHAR(20) NOT NULL CHECK (type IN ('goal', 'habit')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_user_category UNIQUE (user_id, name, type)
+);
+
+-- Таблица целей
+CREATE TABLE goals (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    category VARCHAR(50),
+    goal_type VARCHAR(20) CHECK (goal_type IN ('numeric', 'boolean', 'habit')),
+    target_value NUMERIC(10,2),
+    current_value NUMERIC(10,2) DEFAULT 0,
+    unit VARCHAR(20),
+    start_date DATE NOT NULL,
+    end_date DATE,
+    status VARCHAR(20) DEFAULT 'active' 
+        CHECK (status IN ('active', 'completed', 'failed', 'paused')),
+    priority INTEGER CHECK (priority >= 1 AND priority <= 5),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица прогресса целей
+CREATE TABLE goal_progress (
+    id SERIAL PRIMARY KEY,
+    goal_id INTEGER NOT NULL REFERENCES goals(id) ON DELETE CASCADE,
+    date DATE NOT NULL,
+    value NUMERIC(10,2) NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_goal_date UNIQUE (goal_id, date)
+);
+
+-- Таблица привычек
+CREATE TABLE habits (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    category VARCHAR(50),
+    frequency VARCHAR(20) NOT NULL CHECK (frequency IN ('daily', 'weekly', 'monthly')),
+    target_count INTEGER DEFAULT 1,
+    start_date DATE NOT NULL,
+    end_date DATE,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица отслеживания привычек
+CREATE TABLE habit_tracking (
+    id SERIAL PRIMARY KEY,
+    habit_id INTEGER NOT NULL REFERENCES habits(id) ON DELETE CASCADE,
+    date DATE NOT NULL,
+    completed_count INTEGER DEFAULT 0,
+    target_count INTEGER NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_habit_date UNIQUE (habit_id, date)
+);
+
+-- Таблица отслеживания веса
+CREATE TABLE weight_tracking (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    date DATE NOT NULL,
+    weight NUMERIC(5,2) NOT NULL CHECK (weight > 0),
+    body_fat_percent NUMERIC(4,2) CHECK (body_fat_percent >= 0 AND body_fat_percent <= 100),
+    muscle_mass NUMERIC(5,2),
+    waist_circumference NUMERIC(4,1),
+    hip_circumference NUMERIC(4,1),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_user_weight_date UNIQUE (user_id, date)
+
+    -- Включаем RLS для всех таблиц
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE goal_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE habits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE habit_tracking ENABLE ROW LEVEL SECURITY;
+ALTER TABLE weight_tracking ENABLE ROW LEVEL SECURITY;
+
+-- Только администраторы могут видеть всех пользователей
+-- Пользователи видят только свои данные
+--Так для всех таблиц
+CREATE POLICY users_select_policy ON users
+    FOR SELECT
+    USING (
+        id = current_setting('app.current_user_id', TRUE)::INTEGER 
+        OR current_setting('app.user_role', TRUE) = 'postgres'
+    );
+
+    
+Получение всех активных пользователей
+SELECT id, username, email, created_at 
+FROM users 
+WHERE is_active = TRUE 
+ORDER BY created_at DESC;
+
+
+Получение всех целей одного пользователя
+SELECT title, description, status, current_value, target_value, unit, end_date
+FROM goals 
+WHERE user_id = 1 
+ORDER BY priority DESC, end_date;
+
+Получение активных привычек пользователя
+SELECT name, description, frequency, target_count, start_date
+FROM habits 
+WHERE user_id = 1 AND is_active = TRUE;
+
+Регистрация нового пользователя
+INSERT INTO users (username, email, password_hash) 
+VALUES ('new_user', 'user@example.com', 'hashed_password_123');
+
+Создание новой цели
+INSERT INTO goals (user_id, title, goal_type, target_value, unit, start_date, priority) 
+VALUES (1, 'Пробежать 10 км', 'numeric', 10, 'км', '2024-02-01', 3);
+
+Создание новой привычки
+INSERT INTO habits (user_id, name, frequency, target_count, start_date) 
+VALUES (1, 'Читать книгу', 'daily', 1, '2024-02-01');
+
+Фиксация выполнения привычки на сегодня
+INSERT INTO habit_tracking (habit_id, date, completed_count, target_count) 
+VALUES (1, CURRENT_DATE, 1, 1);
+
+
 ## <a id="end"> **Заключение** </a>
 В рамках выполнения курсового проекта была успешно разработана и реализована информационная система управления домашней библиотекой на языке Python с использованием современных технологий и подходов к программированию.
+
+## <a id="literature"> **Список литературы** </a>
+
+Основная литература
+Дейтел, П. Дж., Дейтел, Х. М. PHP и MySQL. Разработка веб-приложений. — 5-е изд. — СПб.: Питер, 2021. — 816 с.
+Содержит полное руководство по разработке веб-приложений с использованием PHP и баз данных.
+
+Дакетт, Дж. HTML и CSS. Разработка и дизайн веб-сайтов. — М.: Эксмо, 2020. — 480 с.
+*Классическое руководство по основам веб-разработки, включая HTML5 и CSS3.*
+
+Петин, В. А. Разработка веб-приложений с помощью PHP и MySQL. — 4-е изд. — СПб.: БХВ-Петербург, 2022. — 704 с.
+Практическое руководство с примерами создания полного веб-приложения.
+
+Карпова, Т. С. Базы данных: модели, разработка, реализация. — 2-е изд. — СПб.: Питер, 2021. — 560 с.
+Теоретические основы проектирования и реализации баз данных.
+
+Официальная документация
+PostgreSQL Global Development Group. PostgreSQL 14 Documentation [Электронный ресурс]. — Режим доступа: https://www.postgresql.org/docs/14/index.html (дата обращения: 25.11.2023).
+Официальная документация по СУБД PostgreSQL.
+
+PHP Documentation Group. PHP Manual [Электронный ресурс]. — Режим доступа: https://www.php.net/manual/ru/ (дата обращения: 25.11.2023).
+Официальная документация по языку PHP.
+
+World Wide Web Consortium (W3C). HTML Living Standard [Электронный ресурс]. — Режим доступа: https://html.spec.whatwg.org/ (дата обращения: 25.11.2023).
+Спецификация стандарта HTML.
 
 
