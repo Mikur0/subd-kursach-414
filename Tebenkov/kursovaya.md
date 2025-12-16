@@ -466,7 +466,8 @@ ENUM/CHECK для типов — ограничивают допустимые �
 Разработка таблиц осуществлялась в среде PostgreSQL 14+ с использованием SQL-скриптов, выполняемых через утилиту командной строки psql. Все таблицы созданы с учетом нормализации до 3NF, с явным указанием типов данных, ограничений целостности и связей между таблицами.
 
 
--- Таблица пользователей
+Таблица пользователей
+```sql
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -475,8 +476,10 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE
 );
+```
 
 -- Таблица категорий
+```sql
 CREATE TABLE categories (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -485,8 +488,10 @@ CREATE TABLE categories (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT unique_user_category UNIQUE (user_id, name, type)
 );
+```
 
 -- Таблица целей
+```sql
 CREATE TABLE goals (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -505,8 +510,10 @@ CREATE TABLE goals (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+```
 
 -- Таблица прогресса целей
+```sql
 CREATE TABLE goal_progress (
     id SERIAL PRIMARY KEY,
     goal_id INTEGER NOT NULL REFERENCES goals(id) ON DELETE CASCADE,
@@ -516,8 +523,10 @@ CREATE TABLE goal_progress (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT unique_goal_date UNIQUE (goal_id, date)
 );
+```
 
 -- Таблица привычек
+```sql
 CREATE TABLE habits (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -531,8 +540,11 @@ CREATE TABLE habits (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+```
+
 
 -- Таблица отслеживания привычек
+```sql
 CREATE TABLE habit_tracking (
     id SERIAL PRIMARY KEY,
     habit_id INTEGER NOT NULL REFERENCES habits(id) ON DELETE CASCADE,
@@ -543,6 +555,7 @@ CREATE TABLE habit_tracking (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT unique_habit_date UNIQUE (habit_id, date)
 );
+```
 
 -- Таблица отслеживания веса
  ```sql
