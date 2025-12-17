@@ -1479,7 +1479,7 @@ INSERT INTO {table_name} VALUES ({', '.join(values)});
 
 Архитектура приложения:
 
-photo_studio_app/
+| photo_studio_app/
 ├── photo_studio.exe                       - приложение, скомпилированное из photo_studio.py
 |    └── function
 |         ├─ login window                  - функция авторизации
