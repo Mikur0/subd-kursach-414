@@ -1,1 +1,189 @@
-
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ER-диаграмма: Учёт гитар</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .mermaid {
+            overflow: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+            min-height: 600px;
+        }
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .legend {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#3498db',
+                primaryBorderColor: '#2980b9',
+                primaryTextColor: '#ffffff',
+                lineColor: '#2c3e50',
+                fontSize: '16px'
+            },
+            er: {
+                diagramPadding: 30,
+                layoutDirection: 'TB',
+                useMaxWidth: true
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>ER-диаграмма базы данных для учёта продаж гитар</h1>
+        
+        <div class="legend">
+            <strong>Условные обозначения:</strong><br>
+            • <strong>PK</strong> - Первичный ключ (Primary Key)<br>
+            • <strong>FK</strong> - Внешний ключ (Foreign Key)<br>
+            • <strong>||--o{</strong> - Один ко многим (One to Many)<br>
+            • <strong>}o--o{</strong> - Многие ко многим (Many to Many)<br>
+            • <strong>||--||</strong> - Один к одному (One to One)
+        </div>
+        
+        <div class="mermaid">
+erDiagram
+    %% Основные сущности
+    Производитель {
+        integer id PK
+        string название
+        string страна
+        date год_основания
+    }
+    
+    Категория {
+        integer id PK
+        string название
+        text описание
+    }
+    
+    Гитара {
+        integer id PK
+        string название
+        integer производитель_id FK
+        integer категория_id FK
+        string тип
+        integer год_выпуска
+        string материал
+        string цвет
+        integer лады
+        decimal цена
+        integer количество
+    }
+    
+    Поставщик {
+        integer id PK
+        string название
+        string контактное_лицо
+        string телефон
+        string email
+        string адрес
+    }
+    
+    Клиент {
+        integer id PK
+        string ФИО
+        string телефон
+        string email
+        string адрес
+        date дата_регистрации
+    }
+    
+    Сотрудник {
+        integer id PK
+        string ФИО
+        string должность
+        string телефон
+        string email
+        date дата_найма
+        decimal зарплата
+    }
+    
+    %% Транзакционные сущности
+    Поставка {
+        integer id PK
+        date дата
+        integer поставщик_id FK
+        decimal общая_сумма
+    }
+    
+    Продажа {
+        integer id PK
+        date дата
+        integer клиент_id FK
+        integer сотрудник_id FK
+        decimal общая_сумма
+    }
+    
+    Позиция_поставки {
+        integer id PK
+        integer поставка_id FK
+        integer гитара_id FK
+        integer количество
+        decimal цена_закупки
+    }
+    
+    Позиция_продажи {
+        integer id PK
+        integer продажа_id FK
+        integer гитара_id FK
+        integer количество
+        decimal цена
+    }
+    
+    %% Связи между сущностями
+    Производитель ||--o{ Гитара : "производит"
+    Категория ||--o{ Гитара : "классифицирует"
+    Поставщик ||--o{ Поставка : "осуществляет"
+    Поставка ||--|{ Позиция_поставки : "содержит"
+    Гитара }o--o{ Позиция_поставки : "включена в"
+    Гитара }o--o{ Позиция_продажи : "включена в"
+    Продажа ||--|{ Позиция_продажи : "состоит из"
+    Клиент ||--o{ Продажа : "совершает"
+    Сотрудник ||--o{ Продажа : "обслуживает"
+        </div>
+        
+        <footer>
+            <p>Диаграмма сущность-связь (ER Diagram) | Сгенерировано с помощью Mermaid.js</p>
+            <p>Для просмотра диаграммы откройте этот файл в браузере</p>
+        </footer>
+    </div>
+</body>
+</html>
