@@ -720,8 +720,8 @@
 
 Итог: Система построена по классической клиент-серверной архитектуре с использованием стабильных и распространенных технологий (Python, PostgreSQL, PyQt). Ее основное и критическое взаимодействие — с СУБД PostgreSQL. Вспомогательное взаимодействие с офисными пакетами и файловыми менеджерами осуществляется через обмен файлами стандартных форматов, что обеспечивает простоту и надежность. Потенциал для глубокой интеграции со сторонними сервисами (сайт, CRM, SMS) заложен в архитектуре и может быть реализован в будущем.
 
-
-
+<br>
+<br>
 
 # <p align="center"><a id="stage2">Глава 2</a></p>
 
@@ -755,8 +755,6 @@
 
 ### <a id="attribute">2.2. Определение атрибутов объектов</a>
 Для каждой сущности определен полный набор атрибутов (характеристик, свойств).
-
-<br>
 
 #### Сущность: Клиент (Client)
 
@@ -870,8 +868,6 @@
 
 ### <a id="relations">2.3. Определение отношений и кардинальности между объектами</a>
 Кардинальность определяет, сколько экземпляров одной сущности может быть связано с экземпляром другой сущности.
-
-<br>
 
 #### Клиент — Заказ (1 : N)
 
@@ -1042,133 +1038,131 @@
 ### 3.1. Преобразование сущностей в таблицы
 Каждая сущность из концептуальной модели преобразуется в таблицу со следующими свойствами:
 
-<br>
-
 #### Таблица post (Должности)
-- Назначение: Справочник должностей сотрудников.
-- Столбцы:
+Назначение: Справочник должностей сотрудников.
+Столбцы:
 
-*post_id* (SERIAL, PRIMARY KEY) — уникальный идентификатор.
+- *post_id* (SERIAL, PRIMARY KEY) — уникальный идентификатор.
 
-*name* (TEXT, NOT NULL, UNIQUE) — название должности.
+- *name* (TEXT, NOT NULL, UNIQUE) — название должности.
 
 <br>
 
 #### Таблица employee (Сотрудники)
-- Назначение: Учет работников фотостудии.
-- Столбцы:
+Назначение: Учет работников фотостудии.
+Столбцы:
 
-*employee_id* (SERIAL, PRIMARY KEY)
+- *employee_id* (SERIAL, PRIMARY KEY)
 
-*surname* (TEXT, NOT NULL)
+- *surname* (TEXT, NOT NULL)
 
-*name* (TEXT, NOT NULL)
+- *name* (TEXT, NOT NULL)
 
-*patronymic* (TEXT)
+- *patronymic* (TEXT)
 
-*post_id* (INT, REFERENCES post(post_id)) — связь с должностью.
+- *post_id* (INT, REFERENCES post(post_id)) — связь с должностью.
 
-*phone* (VARCHAR(255))
+- *phone* (VARCHAR(255))
 
 <br>
 
 #### Таблица client (Клиенты)
-- Назначение: База данных клиентов.
-- Столбцы:
+Назначение: База данных клиентов.
+Столбцы:
 
-*client_id* (SERIAL, PRIMARY KEY)
+- *client_id* (SERIAL, PRIMARY KEY)
 
-*surname* (TEXT)
+- *surname* (TEXT)
 
-*name* (TEXT, NOT NULL)
+- *name* (TEXT, NOT NULL)
 
-*patronymic* (TEXT)
+- *patronymic* (TEXT)
 
-*phone* (VARCHAR(255))
+- *phone* (VARCHAR(255))
 
-*email* (TEXT)
+- *email* (TEXT)
 
 <br>
 
 #### Таблица payment_method (Способы оплаты)
-- Назначение: Справочник вариантов оплаты.
-- Столбцы:
+Назначение: Справочник вариантов оплаты.
+Столбцы:
 
-*payment_method_id* (SERIAL, PRIMARY KEY)
+- *payment_method_id* (SERIAL, PRIMARY KEY)
 
-*name* (TEXT, NOT NULL, UNIQUE)
+- *name* (TEXT, NOT NULL, UNIQUE)
 
 <br>
 
 #### Таблица contact_method (Способы связи)
-- Назначение: Справочник каналов коммуникации.
-- Столбцы:
+Назначение: Справочник каналов коммуникации.
+Столбцы:
 
-*contact_method_id* (SERIAL, PRIMARY KEY)
+- *contact_method_id* (SERIAL, PRIMARY KEY)
 
-*name* (TEXT, NOT NULL, UNIQUE)
+- *name* (TEXT, NOT NULL, UNIQUE)
 
 <br>
 
 #### Таблица service (Услуги)
-- Назначение: Каталог услуг с ценами.
-- Столбцы:
+Назначение: Каталог услуг с ценами.
+Столбцы:
 
-*service_id* (SERIAL, PRIMARY KEY)
+- *service_id* (SERIAL, PRIMARY KEY)
 
-*name* (TEXT, NOT NULL)
+- *name* (TEXT, NOT NULL)
 
-*service_price* (NUMERIC(10,2), NOT NULL)
+- *service_price* (NUMERIC(10,2), NOT NULL)
 
 <br>
 
 #### Таблица orders (Заказы)
-- Назначение: Регистрация всех совершённых заказов.
-- Столбцы:
+Назначение: Регистрация всех совершённых заказов.
+Столбцы:
 
-*order_id* (SERIAL, PRIMARY KEY)
+- *order_id* (SERIAL, PRIMARY KEY)
 
-*client_id* (INT, NOT NULL, REFERENCES client(client_id))
+- *client_id* (INT, NOT NULL, REFERENCES client(client_id))
 
-*payment_method_id* (INT, NOT NULL, REFERENCES payment_method(payment_method_id))
+- *payment_method_id* (INT, NOT NULL, REFERENCES payment_method(payment_method_id))
 
-*contact_method_id* (INT, NOT NULL, REFERENCES contact_method(contact_method_id))
+- *contact_method_id* (INT, NOT NULL, REFERENCES contact_method(contact_method_id))
 
-*date* (TIMESTAMP DEFAULT NOW())
+- *date* (TIMESTAMP DEFAULT NOW())
 
-*total_sum* (NUMERIC(10,2) DEFAULT 0)
+- *total_sum* (NUMERIC(10,2) DEFAULT 0)
 
 <br>
 
 #### Таблица order_info (Состав заказов)
-- Назначение: Детализация заказов (связь M:N между orders и service).
-- Столбцы:
+Назначение: Детализация заказов (связь M:N между orders и service).
+Столбцы:
 
-*order_info_id* (SERIAL, PRIMARY KEY)
+- *order_info_id* (SERIAL, PRIMARY KEY)
 
-*order_id* (INT, NOT NULL, REFERENCES orders(order_id) ON DELETE CASCADE)
+- *order_id* (INT, NOT NULL, REFERENCES orders(order_id) ON DELETE CASCADE)
 
-*service_id* (INT, NOT NULL, REFERENCES service(service_id))
+- *service_id* (INT, NOT NULL, REFERENCES service(service_id))
 
-*quantity* (INT, NOT NULL, CHECK (quantity > 0))
+- *quantity* (INT, NOT NULL, CHECK (quantity > 0))
 
 <br>
 
 #### Таблица users (Пользователи системы)
-- Назначение: Управление доступом к приложению.
-- Столбцы:
+Назначение: Управление доступом к приложению.
+Столбцы:
 
-*user_id* (SERIAL, PRIMARY KEY)
+- *user_id* (SERIAL, PRIMARY KEY)
 
-*username* (TEXT, NOT NULL, UNIQUE)
+- *username* (TEXT, NOT NULL, UNIQUE)
 
-*password_hash* (TEXT, NOT NULL)
+- *password_hash* (TEXT, NOT NULL)
 
-*role* (TEXT, NOT NULL, CHECK (role IN ('owner', 'administrator', 'worker', 'accountant')))
+- *role* (TEXT, NOT NULL, CHECK (role IN ('owner', 'administrator', 'worker', 'accountant')))
 
-*name* (TEXT)
+- *name* (TEXT)
 
-*created_at* (TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
+- *created_at* (TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
 
 <br>
 <br>
@@ -1189,7 +1183,7 @@
 | Service(1) - OrderInfo(N)   | order_info.service_id → service.service_id                  | 1:N            | Указание услуги в составе заказа
 | Order(M) - Service(N)       | order_info.service_id → service.service_id                  | M:N            | Косвенная связь через промежуточную таблицу
 
-
+<br>
 <br>
 
 ### 3.3. Нормализация базы данных
@@ -1198,7 +1192,7 @@
 
 #### База данных приведена к третьей нормальной форме (3NF):
 
-##### Первая нормальная форма (1NF):
+1. Первая нормальная форма (1NF):
 
 - Все таблицы имеют первичный ключ
 
@@ -1210,7 +1204,7 @@
 
 <br>
 
-##### Вторая нормальная форма (2NF):
+2. Вторая нормальная форма (2NF):
 
 - Соответствует 1NF
 
@@ -1220,7 +1214,7 @@
 
 <br>
 
-##### Третья нормальная форма (3NF):
+3. Третья нормальная форма (3NF):
 
 - Соответствует 2NF
 
@@ -1232,8 +1226,8 @@
 <br>
 
 ### 3.4. Ограничения целостности
-<br>
-#### Для обеспечения целостности данных определены следующие ограничения:
+
+Для обеспечения целостности данных определены следующие ограничения:
 
 - Первичные ключи (PRIMARY KEY): Гарантируют уникальность каждой записи.
 
@@ -1241,7 +1235,7 @@
 
 <br>
 
-#### Проверочные ограничения (CHECK):
+Проверочные ограничения (CHECK):
 
 - *order_info.quantity > 0* - количество не может быть отрицательным или нулевым
 
@@ -1257,6 +1251,7 @@
 <br>
 
 ### 3.5. Примеры запросов, демонстрирующие логическую структуру
+
 ```sql
 SELECT 
     o.order_id,
@@ -1301,6 +1296,7 @@ GROUP BY c.client_id, c.surname, c.name, c.phone;
 <br>
 
 ### 3.6. Преимущества выбранной логической структуры
+
 - Гибкость: Возможность легко добавлять новые услуги, способы оплаты и связи без изменения структуры основных таблиц.
 
 - Масштабируемость: Структура поддерживает рост данных — тысячи клиентов и заказов.
@@ -1324,6 +1320,7 @@ GROUP BY c.client_id, c.surname, c.name, c.phone;
 <br>
 
 ### 4.1. Выбор и обоснование СУБД
+
 Выбранная СУБД: PostgreSQL 15
 
 <br>
@@ -1342,6 +1339,7 @@ GROUP BY c.client_id, c.surname, c.name, c.phone;
 Итог: PostgreSQL выбран как наиболее надежная, безопасная и функциональная СУБД для бизнес-приложения.
 
 <br>
+<br>
 
 ### 4.2. Параметры базы данных
 ```sql
@@ -1351,6 +1349,7 @@ CREATE DATABASE photo_studio;
 <br>
 
 ### 4.3. Типы данных и их обоснование
+
 Критерии выбора типов данных:
 
 - Точность - для финансовых расчетов
@@ -1377,8 +1376,10 @@ CREATE DATABASE photo_studio;
 | Перечисляемые значения   | TEXT с CHECK constraint     | Простота, читаемость                                   | role TEXT CHECK (role IN (...))
 
 <br>
+<br>
 
 ### 4.4. Стратегия именования
+
 Принципы именования:
 
 - Таблицы: имена в единственном числе, snake_case
@@ -1838,6 +1839,9 @@ INSERT INTO {table_name} VALUES ({', '.join(values)});
 - Сохранение в *CSV/TXT*
 
 
+<br>
+<br>
+
 ### 5.4. Назначение прав доступа
 
 ```sql
@@ -1895,6 +1899,8 @@ GRANT SELECT ON orders, order_info, service, client, payment_method, employee TO
 GRANT SELECT ON orders_order_id_seq, order_info_order_info_id_seq TO accountant_user;
 ```
 
+<br>
+<br>
 
 ### 5.5. Создание индексов
 ```sql
@@ -1924,6 +1930,9 @@ CREATE INDEX idx_audit_changed_at ON audit_log(changed_at DESC);
 CREATE INDEX idx_audit_table_operation ON audit_log(table_name, operation);
 ```
 
+<br>
+<br>
+
 ### 5.6. Разработка стратегии резервного копирования баз данных
 
 Функция для создания полного бэкапа:
@@ -1944,6 +1953,8 @@ BEGIN
 END;
 $$;
 ```
+
+<br>
 
 Функция для создания инкрементального бэкапа:
 ```sql
@@ -1973,6 +1984,8 @@ END;
 $$;
 ```
 
+<br>
+
 Функция для получения последнего успешного бэкапа:
 ```sql
 CREATE OR REPLACE FUNCTION get_latest_backup(backup_type_param VARCHAR DEFAULT 'full')
@@ -2000,6 +2013,8 @@ END;
 $$;
 ```
 
+<br>
+
 Функция для проверки целостности бэкапа:
 ```sql
 CREATE OR REPLACE FUNCTION verify_backup(backup_id_param INTEGER)
@@ -2025,6 +2040,8 @@ END;
 $$;
 ```
 
+<br>
+
 ### 5.7. Разработка стратегии защиты баз данных и хранения информации средствами СУБД (настройка ролей и обеспечение безопасности на уровне строк)
 
 ```sql
@@ -2048,6 +2065,7 @@ ALTER TABLE audit_log SET SCHEMA audit;
 ALTER TABLE backup_log SET SCHEMA audit;
 ```
 
+<br>
 
 ### 5.8. Разработка API, реализующего работу с базой данных внешнего приложения
 
@@ -2162,11 +2180,13 @@ if __name__ == '__main__':
     main()
 ```
 
-
-
+<br>
+<br>
 
 ## <a id="end">6. Заключение</a>
 В ходе выполнения курсового проекта была разработана и реализована комплексная информационная система для автоматизации бизнес-процессов фотостудии. Проект включал полный цикл разработки — от анализа предметной области до создания рабочего приложения с графическим интерфейсом и безопасной базой данных.
+
+<br>
 
 Основные достижения проекта:
 1. Полная автоматизация ключевых процессов:
@@ -2177,13 +2197,19 @@ if __name__ == '__main__':
 
 - Создано desktop-приложение на Python с PyQt6 с интуитивно понятным интерфейсом
 
+<br>
+
 2. Хороший уровень безопасности:
 
 - Внедрена четырехуровневая ролевая модель доступа (владелец, администратор, работник, бухгалтер)
 
+<br>
+
 3. Надежность:
 
 - Разработана стратегия резервного копирования и восстановления данных
+
+<br>
 
 4. Гибкость и масштабируемость:
 
@@ -2191,17 +2217,23 @@ if __name__ == '__main__':
 
 - Реализован экспорт данных в различные форматы (CSV, Excel, TXT)
 
+<br>
+
 5. Практическая значимость:
 
 - Система готова к внедрению в реальную фотостудию
 
 - Повышение эффективности работы сотрудников
 
+<br>
+
 6. Технологический стек:
 
 - СУБД: PostgreSQL 15
 
-- Клиентское приложение: Python 3.8+, PyQt6, psycopg2, pandas
+- Приложение: Python 3.8+, PyQt6, psycopg2, pandas
+
+<br>
 
 7. Перспективы развития:
 
@@ -2215,8 +2247,8 @@ if __name__ == '__main__':
 
 Разработанная система представляет собой законченное решение, которое может быть успешно внедрено в деятельность фотостудий малого и среднего бизнеса. Проект демонстрирует практическое применение знаний в области проектирования баз данных, разработки клиент-серверных приложений и обеспечения информационной безопасности.
 
-
-
+<br>
+<br>
 
 ## <a id="info">7. Список использованных источников</a>
 - К. Дж. Дейт. Введение в системы баз данных.
@@ -2237,8 +2269,8 @@ if __name__ == '__main__':
 - Stack Overflow — вопросы и ответы по программированию. https://stackoverflow.com
 - GitHub — репозитории с примерами кода. https://github.com
 
-
-
+<br>
+<br>
 
 ## <a id="dates">8. Даты и подписи</a>
 
