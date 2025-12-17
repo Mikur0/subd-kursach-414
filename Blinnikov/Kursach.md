@@ -78,7 +78,7 @@
 
 
 
-#<a id="#stage1"><p align="center"> Глава 1 </p>
+# <a id="#stage1"><p align="center">Глава 1</p>
 
 
 
